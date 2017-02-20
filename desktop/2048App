@@ -108,7 +108,7 @@ class _2048App(wx.App):
 		self.SetAppName(AppInfo.Name)
 		self.SetVendorName(AppInfo.Vendor)
 		self.appIcon = wx.Icon(
-			os.path.join(self.commonPath["ScriptFolder"], "2048.png"),
+			os.path.join(self.commonPath["ScriptFolder"], "2048App.png"),
 			wx.BITMAP_TYPE_PNG
 		)
 		
