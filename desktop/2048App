@@ -1,0 +1,140 @@
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+# vim: set ts=4:
+
+import wx 
+import wx.html2 
+import os
+
+class AppInfo(object):
+	Vendor  = "malte70"
+	Name    = "2048App"
+	Version = "0.1"
+	Website = "https://github.com/malte70/2048"
+
+class _2048Frame(wx.Frame):
+	app = None
+	
+	def __init__(self, app, parent, title, size=(800,600)):
+		self.app = app
+		wx.Frame.__init__(self, parent, title=title, size=size)
+		
+		# Menu
+		self.menu_bar   = wx.MenuBar()
+		self.menu_main  = wx.Menu()
+		self.menu_new   = self.menu_main.Append(wx.ID_NEW,   "&New game\tCtrl+N", "")
+		self.menu_help  = self.menu_main.Append(wx.ID_HELP,  "&Help\tF1",         "")
+		self.menu_main.AppendSeparator()
+		self.menu_about = self.menu_main.Append(wx.ID_ABOUT, "&About\tF12",   "")
+		self.menu_exit  = self.menu_main.Append(wx.ID_EXIT,  "E&xit\tCtrl+Q",     "")
+		self.menu_bar.Append(self.menu_main, "&2048")
+		self.SetMenuBar(self.menu_bar)
+		self.Bind(wx.EVT_MENU, self.OnNewGame, self.menu_new)
+		self.Bind(wx.EVT_MENU, self.OnHelp,    self.menu_help)
+		self.Bind(wx.EVT_MENU, self.OnAbout,   self.menu_about)
+		self.Bind(wx.EVT_MENU, self.OnExit,    self.menu_exit)
+		
+		# WebView and Sizer
+		self.sizer   = wx.BoxSizer(wx.VERTICAL)
+		self.browser = wx.html2.WebView.New(self)
+		self.sizer.Add(self.browser, 1, wx.EXPAND, 10)
+		self.SetSizer(self.sizer)
+		
+		# About dialog info
+		self.info = wx.AboutDialogInfo()
+		self.info.SetIcon(self.GetIcon())
+		self.info.SetName(self.app.GetAppName())
+		self.info.SetVersion(AppInfo.Version)
+		self.info.SetDescription("""Gabriele Cirulli's 2048, wrapped in a minimal
+desktop application""")
+		self.info.SetCopyright("© 2016 Malte Bublitz\n© 2014 Gabriele Cirulli")
+		self.info.SetWebSite(AppInfo.Website)
+		licence = open(
+			os.path.join(
+				self.app.commonPath["ProjectRoot"],
+				"LICENSE"
+			)
+		).read()
+		self.info.SetLicence(licence)
+		self.info.AddDeveloper("Malte Bublitz")
+		self.info.AddDeveloper("Gabriele Cirulli")
+		#self.info.AddDocWriter("Malte Bublitz")
+		self.info.AddArtist("Gabriele Cirulli")
+		#self.info.AddTranslator("Gabriele Cirulli")
+		
+	def Browser_LoadURL(self, url):
+		self.browser.LoadURL(url)
+		
+	def OnNewGame(self, event):
+		self.browser.RunScript("document.getElementsByClassName(\"restart-button\")[0].click()")
+		
+	def OnHelp(self, event):
+		d = wx.MessageDialog(
+			self,
+			"Error: Help is not implemented yet.",
+			"Not implemented yet",
+			wx.OK | wx.ICON_ERROR
+		)
+		d.ShowModal()
+		
+	def OnAbout(self, event):
+		wx.AboutBox(self.info)
+		
+	def OnExit(self, event):
+		self.Close()
+		
+class _2048App(wx.App):
+	commonPath = {}
+	
+	def ChangeToProjectDirectory(self):
+		"""
+		Change current directory to project root
+		"""
+		self.commonPath["ScriptFolder"] = os.path.dirname(
+			os.path.abspath(
+				__file__
+			)
+		)
+		self.commonPath["ProjectRoot"]  = os.path.join(
+			self.commonPath["ScriptFolder"],
+			".."
+		)
+		os.chdir(self.commonPath["ProjectRoot"])
+		
+	def OnInit(self):
+		# Change Directory, set AppVendor and AppName,
+		# and load app icon
+		self.ChangeToProjectDirectory()
+		self.SetAppName(AppInfo.Name)
+		self.SetVendorName(AppInfo.Vendor)
+		self.appIcon = wx.Icon(
+			os.path.join(self.commonPath["ScriptFolder"], "2048.png"),
+			wx.BITMAP_TYPE_PNG
+		)
+		
+		# Create main Frame
+		mainFrame = _2048Frame(
+			app    = self,
+			parent = None,
+			title  = AppInfo.Name,
+			size   = (800,600)
+		)
+		mainFrame.SetIcon(self.appIcon)
+		
+		# URL of 2048's index.html
+		url = "file://"+os.getcwd()+"/index.html"
+		
+		# Load that url
+		mainFrame.Browser_LoadURL(url)
+		
+		# Show frame maximized
+		mainFrame.Show()
+		mainFrame.Maximize()
+		self.SetTopWindow(mainFrame)
+		
+		return True
+		
+if __name__ == '__main__': 
+	app   = _2048App()
+	app.MainLoop() 
+	

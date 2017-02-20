@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=2048
+GenericName=Puzzle Game
+Comment=Original game by Gabriele Cirulli, wrapped in a minimal desktop application
+Icon=/opt/2048/desktop/2048.png
+Exec=/opt/2048/desktop/2048App
+Terminal=false
+StartupNotify=false
+Categories=Game;ArcadeGame;
+Keywords=game;arcade;platform;
